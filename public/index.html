@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>İçerik Analiz — YouTube Hashtag Araştırması</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header__brand">
+        <div class="header__logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v18h18"/>
+            <path d="M7 14l4-4 4 4 5-6"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="header__title">İçerik Analiz</h1>
+          <p class="header__subtitle">YouTube hashtag performansını keşfedin</p>
+        </div>
+      </div>
+      <div class="header__stats" id="summaryStats" hidden>
+        <div class="stat-pill">
+          <span class="stat-pill__label">Toplam video</span>
+          <span class="stat-pill__value" id="statVideos">0</span>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-pill__label">Toplam izlenme</span>
+          <span class="stat-pill__value" id="statViews">0</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="search-section">
+        <form class="search-form" id="searchForm" autocomplete="off">
+          <div class="search-form__wrapper">
+            <span class="search-form__icon" aria-hidden="true">#</span>
+            <input
+              type="text"
+              id="hashtagInput"
+              class="search-form__input"
+              placeholder="Hashtag ara… örn: fitness, yemek, teknoloji"
+              aria-label="Hashtag ara"
+              required
+            >
+            <button type="submit" class="search-form__btn" id="searchBtn">
+              <span class="search-form__btn-text">Analiz Et</span>
+              <svg class="search-form__btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="results-section" id="resultsSection" hidden>
+        <div class="results-header">
+          <div>
+            <h2 class="results-header__title">
+              <span id="resultsHashtag">#hashtag</span> sonuçları
+            </h2>
+            <p class="results-header__meta" id="resultsMeta"></p>
+          </div>
+          <span class="badge badge--mock" id="mockBadge" hidden>Demo veri</span>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="video-table" id="videoTable">
+            <thead>
+              <tr>
+                <th scope="col">Kapak</th>
+                <th scope="col">Başlık</th>
+                <th scope="col" class="num">İzlenme</th>
+                <th scope="col" class="num">Beğeni</th>
+                <th scope="col" class="num">Paylaşım</th>
+              </tr>
+            </thead>
+            <tbody id="videoTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="empty-state" id="emptyState">
+        <div class="empty-state__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+          </svg>
+        </div>
+        <h2 class="empty-state__title">Hashtag analizine başlayın</h2>
+        <p class="empty-state__text">
+          Bir hashtag girin ve YouTube'daki popüler videoların
+          izlenme, beğeni ve paylaşım metriklerini görüntüleyin.
+        </p>
+      </section>
+
+      <section class="loading-state" id="loadingState" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Videolar yükleniyor…</p>
+      </section>
+
+      <section class="error-state" id="errorState" hidden>
+        <p class="error-state__message" id="errorMessage"></p>
+        <button type="button" class="btn-secondary" id="retryBtn">Tekrar dene</button>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>İçerik Analiz &copy; 2026 — YouTube Data API v3 entegrasyon şablonu</p>
+    </footer>
+  </div>
+
+  <script src="/js/app.js" type="module"></script>
+</body>
+</html>
