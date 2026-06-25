@@ -17,6 +17,11 @@ const elements = {
   summaryStats: document.getElementById("summaryStats"),
   statVideos: document.getElementById("statVideos"),
   statViews: document.getElementById("statViews"),
+  insightsPanel: document.getElementById("insightsPanel"),
+  insightsSummary: document.getElementById("insightsSummary"),
+  insightsTopics: document.getElementById("insightsTopics"),
+  insightsFormats: document.getElementById("insightsFormats"),
+  insightsIdeas: document.getElementById("insightsIdeas"),
 };
 
 let lastQuery = null;
@@ -81,6 +86,28 @@ function escapeAttr(text) {
     .replace(/>/g, "&gt;");
 }
 
+function renderInsightsList(listEl, items) {
+  listEl.replaceChildren();
+  (items || []).forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    listEl.appendChild(li);
+  });
+}
+
+function renderInsights(insights) {
+  if (!insights) {
+    elements.insightsPanel.hidden = true;
+    return;
+  }
+
+  elements.insightsSummary.textContent = insights.trendSummary || "";
+  renderInsightsList(elements.insightsTopics, insights.topTopics);
+  renderInsightsList(elements.insightsFormats, insights.topFormats);
+  renderInsightsList(elements.insightsIdeas, insights.contentIdeas);
+  elements.insightsPanel.hidden = false;
+}
+
 function renderResults(data) {
   elements.tableBody.replaceChildren();
   data.videos.forEach((video) => {
@@ -95,6 +122,8 @@ function renderResults(data) {
   elements.statVideos.textContent = data.videos.length;
   elements.statViews.textContent = formatNumber(totalViews);
   elements.summaryStats.hidden = false;
+
+  renderInsights(data.insights);
 
   setView("results");
 }

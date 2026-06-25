@@ -14,7 +14,7 @@
 const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
 
 function getApiKey() {
-  const key = process.env.YOUTUBE_API_KEY;
+  const key = process.env.YOUTUBE_API_KEY;AIzaSyCtUaLWY00W8TS_jl3lC-kevnbIqmNXs3Y
   if (!key) {
     throw new Error(
       "YOUTUBE_API_KEY tanımlı değil. .env.example dosyasındaki adımları izleyin."
