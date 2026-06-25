@@ -294,6 +294,7 @@ body::before {
   color: var(--warning);
   border: 1px solid rgba(255, 176, 32, 0.3);
 }
+
 /* Charts Panel */
 .charts-panel {
   display: grid;
@@ -370,7 +371,6 @@ body::before {
   }
 }
 
-/* Table */
 /* Table */
 .table-wrapper {
   background: var(--bg-secondary);
