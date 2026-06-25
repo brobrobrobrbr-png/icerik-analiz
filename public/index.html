@@ -70,7 +70,23 @@
           </div>
           <span class="badge badge--mock" id="mockBadge" hidden>Demo veri</span>
         </div>
-
+        <section class="charts-panel" id="chartsPanel" hidden>
+          <div class="chart-card">
+            <p class="chart-card__title">Video başına izlenme dağılımı</p>
+            <div class="chart-card__canvas-wrap chart-card__canvas-wrap--bar">
+              <canvas id="viewsChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card chart-card--narrow">
+            <p class="chart-card__title">Format dağılımı</p>
+            <div class="chart-card__donut-row">
+              <div class="chart-card__canvas-wrap chart-card__canvas-wrap--donut">
+                <canvas id="formatChart"></canvas>
+              </div>
+              <ul class="chart-legend" id="formatLegend"></ul>
+            </div>
+          </div>
+        </section>
         <div class="table-wrapper">
           <table class="video-table" id="videoTable">
             <thead>
@@ -115,7 +131,9 @@
       <p>İçerik Analiz &copy; 2026 — YouTube Data API v3 entegrasyon şablonu</p>
     </footer>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <script src="/js/webEffect.js"></script>
+  <script src="/js/charts.js"></script>
   <script src="/js/app.js" type="module"></script>
 </body>
 </html>

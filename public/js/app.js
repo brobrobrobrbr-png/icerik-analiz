@@ -95,7 +95,9 @@ function renderResults(data) {
   elements.statVideos.textContent = data.videos.length;
   elements.statViews.textContent = formatNumber(totalViews);
   elements.summaryStats.hidden = false;
-
+  if (window.renderCharts) {
+    window.renderCharts(data.videos);
+  }
   setView("results");
 }
 
