@@ -10,12 +10,22 @@ const HAS_ANTHROPIC_KEY = Boolean(process.env.ANTHROPIC_API_KEY);
 // videoları olduğu gibi (titleAnalysis: null) döndürür, arama
 // sonucunu hiçbir şekilde bozmaz.
 async function attachTitleAnalysis(videos) {
-  if (!HAS_ANTHROPIC_KEY || videos.length === 0) {
+  if (!HAS_ANTHROPIC_KEY) {
+    console.log("[Title Analysis] ANTHROPIC_API_KEY tanımlı değil, analiz atlanıyor.");
     return videos.map((video) => ({ ...video, titleAnalysis: null }));
   }
 
+  if (videos.length === 0) {
+    return videos;
+  }
+
+  console.log(`[Title Analysis] ${videos.length} video için analiz başlatılıyor...`);
+
   try {
     const analyses = await analyzeTitles(videos.map((v) => v.title));
+    const successCount = analyses.filter(Boolean).length;
+    console.log(`[Title Analysis] Tamamlandı: ${successCount}/${videos.length} başarılı.`);
+
     return videos.map((video, i) => ({
       ...video,
       titleAnalysis: analyses[i] || null,

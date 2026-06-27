@@ -100,9 +100,12 @@ async function analyzeTitle(title) {
 
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
-      throw new Error(
-        body.error?.message || `Anthropic API isteği başarısız (${response.status})`
+      const message =
+        body.error?.message || `Anthropic API isteği başarısız (${response.status})`;
+      console.error(
+        `[Title Analysis] HTTP ${response.status} - "${title.slice(0, 40)}..." - ${message}`
       );
+      throw new Error(message);
     }
 
     const data = await response.json();
