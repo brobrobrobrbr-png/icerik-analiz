@@ -38,8 +38,68 @@ function setView(state) {
   elements.resultsSection.hidden = state !== "results";
 }
 
+function renderAiScoreCell(analysis) {
+  if (!analysis) {
+    return `<span class="ai-score ai-score--empty">—</span>`;
+  }
+  const tier =
+    analysis.overallScore >= 75 ? "high" : analysis.overallScore >= 50 ? "mid" : "low";
+  return `<button type="button" class="ai-score ai-score--${tier}" data-action="toggle-analysis">
+    ${analysis.overallScore}
+  </button>`;
+}
+
+function renderAnalysisDetail(analysis) {
+  if (!analysis) return "";
+
+  const renderList = (items, emptyText) =>
+    items.length
+      ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+      : `<li class="analysis-detail__empty">${emptyText}</li>`;
+
+  return `
+    <div class="analysis-detail__scores">
+      <div class="analysis-detail__score-item">
+        <span class="analysis-detail__score-label">SEO</span>
+        <span class="analysis-detail__score-value">${analysis.seoScore}</span>
+      </div>
+      <div class="analysis-detail__score-item">
+        <span class="analysis-detail__score-label">Merak Uyandırma</span>
+        <span class="analysis-detail__score-value">${analysis.curiosityScore}</span>
+      </div>
+      <div class="analysis-detail__score-item">
+        <span class="analysis-detail__score-label">Duygusal Etki</span>
+        <span class="analysis-detail__score-value">${analysis.emotionalScore}</span>
+      </div>
+      <div class="analysis-detail__score-item">
+        <span class="analysis-detail__score-label">Okunabilirlik</span>
+        <span class="analysis-detail__score-value">${analysis.readabilityScore}</span>
+      </div>
+      <div class="analysis-detail__score-item">
+        <span class="analysis-detail__score-label">Tıklanma Olasılığı</span>
+        <span class="analysis-detail__score-value">%${analysis.ctrProbability}</span>
+      </div>
+    </div>
+    <div class="analysis-detail__columns">
+      <div class="analysis-detail__col">
+        <p class="analysis-detail__col-title analysis-detail__col-title--good">Güçlü Yönler</p>
+        <ul class="analysis-detail__list">${renderList(analysis.strengths, "Belirtilmedi")}</ul>
+      </div>
+      <div class="analysis-detail__col">
+        <p class="analysis-detail__col-title analysis-detail__col-title--bad">Zayıf Yönler</p>
+        <ul class="analysis-detail__list">${renderList(analysis.weaknesses, "Belirtilmedi")}</ul>
+      </div>
+      <div class="analysis-detail__col">
+        <p class="analysis-detail__col-title">Başlık Önerileri</p>
+        <ul class="analysis-detail__list">${renderList(analysis.suggestions, "Belirtilmedi")}</ul>
+      </div>
+    </div>
+  `;
+}
+
 function renderVideoRow(video) {
   const row = document.createElement("tr");
+  row.className = "video-table__row";
   row.innerHTML = `
     <td>
       <a href="${escapeAttr(video.url)}" target="_blank" rel="noopener noreferrer">
@@ -62,8 +122,29 @@ function renderVideoRow(video) {
     <td class="num"><span class="metric">${formatNumber(video.views)}</span></td>
     <td class="num"><span class="metric">${formatNumber(video.likes)}</span></td>
     <td class="num"><span class="metric">${formatNumber(video.shares)}</span></td>
+    <td class="num">${renderAiScoreCell(video.titleAnalysis)}</td>
   `;
-  return row;
+
+  if (video.titleAnalysis) {
+    const detailRow = document.createElement("tr");
+    detailRow.className = "analysis-detail-row";
+    detailRow.hidden = true;
+    const td = document.createElement("td");
+    td.colSpan = 6;
+    td.innerHTML = `<div class="analysis-detail">${renderAnalysisDetail(video.titleAnalysis)}</div>`;
+    detailRow.appendChild(td);
+
+    const scoreBtn = row.querySelector('[data-action="toggle-analysis"]');
+    if (scoreBtn) {
+      scoreBtn.addEventListener("click", () => {
+        detailRow.hidden = !detailRow.hidden;
+      });
+    }
+
+    return [row, detailRow];
+  }
+
+  return [row];
 }
 
 function escapeHtml(text) {
@@ -84,7 +165,8 @@ function escapeAttr(text) {
 function renderResults(data) {
   elements.tableBody.replaceChildren();
   data.videos.forEach((video) => {
-    elements.tableBody.appendChild(renderVideoRow(video));
+    const rows = renderVideoRow(video);
+    rows.forEach((row) => elements.tableBody.appendChild(row));
   });
 
   elements.resultsHashtag.textContent = `#${data.hashtag}`;
@@ -95,9 +177,11 @@ function renderResults(data) {
   elements.statVideos.textContent = data.videos.length;
   elements.statViews.textContent = formatNumber(totalViews);
   elements.summaryStats.hidden = false;
+
   if (window.renderCharts) {
     window.renderCharts(data.videos);
   }
+
   setView("results");
 }
 
