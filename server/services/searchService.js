@@ -4,14 +4,14 @@ const { analyzeTitles } = require("./titleAnalysisService");
 
 const USE_MOCK = process.env.USE_MOCK_DATA !== "false";
 const HAS_YOUTUBE_KEY = Boolean(process.env.YOUTUBE_API_KEY);
-const HAS_ANTHROPIC_KEY = Boolean(process.env.ANTHROPIC_API_KEY);
+const HAS_GEMINI_KEY = Boolean(process.env.GEMINI_API_KEY);
 
 // AI başlık analizi opsiyoneldir: key yoksa veya hata olursa
 // videoları olduğu gibi (titleAnalysis: null) döndürür, arama
 // sonucunu hiçbir şekilde bozmaz.
 async function attachTitleAnalysis(videos) {
-  if (!HAS_ANTHROPIC_KEY) {
-    console.log("[Title Analysis] ANTHROPIC_API_KEY tanımlı değil, analiz atlanıyor.");
+  if (!HAS_GEMINI_KEY) {
+    console.log("[Title Analysis] GEMINI_API_KEY tanımlı değil, analiz atlanıyor.");
     return videos.map((video) => ({ ...video, titleAnalysis: null }));
   }
 

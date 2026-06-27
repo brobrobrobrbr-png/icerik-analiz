@@ -1,5 +1,5 @@
 /**
- * AI Başlık Analizi Servisi (Anthropic Claude API)
+ * AI Başlık Analizi Servisi (Google Gemini API)
  *
  * Her video başlığını analiz eder ve şunları üretir:
  *   - overallScore: Genel Başlık Puanı (0-100)
@@ -13,19 +13,20 @@
  *   - suggestions: Daha iyi başlık önerileri (liste)
  *
  * Gerekli ortam değişkeni (.env):
- *   ANTHROPIC_API_KEY
+ *   GEMINI_API_KEY
  *
  * Tasarım notu: İstekler paralel gönderilir ama küçük gruplar
- * halinde (BATCH_SIZE) sınırlanır — rate limit'e çarpmamak için.
- * Bir başlığın analizi başarısız olursa null döner, tüm arama
- * akışını bozmaz (searchService bunu tolere eder).
+ * halinde (BATCH_SIZE) sınırlanır — Gemini'nin ücretsiz katmanı
+ * dakikada ~15 istekle sınırlı olduğu için, batch boyutu küçük
+ * tutulur. Bir başlığın analizi başarısız olursa null döner,
+ * tüm arama akışını bozmaz (searchService bunu tolere eder).
  *
- * Dokümantasyon: https://docs.claude.com/en/api/messages
+ * Dokümantasyon: https://ai.google.dev/api/generate-content
  */
 
-const ANTHROPIC_API_BASE = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-haiku-4-5-20251001";
-const BATCH_SIZE = 5;
+const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const MODEL = "gemini-3-flash";
+const BATCH_SIZE = 3;
 
 const ANALYSIS_SCHEMA_PROMPT = `Bir YouTube video başlığını analiz ediyorsun. Aşağıdaki başlığı incele ve SADECE aşağıdaki şemaya uyan bir JSON nesnesi döndür, başka hiçbir açıklama veya metin ekleme:
 
@@ -44,9 +45,9 @@ const ANALYSIS_SCHEMA_PROMPT = `Bir YouTube video başlığını analiz ediyorsu
 Başlık: "{TITLE}"`;
 
 function getApiKey() {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.GEMINI_API_KEY;
   if (!key) {
-    throw new Error("ANTHROPIC_API_KEY tanımlı değil.");
+    throw new Error("GEMINI_API_KEY tanımlı değil.");
   }
   return key;
 }
@@ -76,32 +77,30 @@ function normalizeAnalysis(raw) {
   };
 }
 
-/**
- * Tek bir başlığı analiz eder. Hata durumunda null döner
- * (üst seviye akışı bozmamak için exception fırlatmaz).
- */
 async function analyzeTitle(title) {
   try {
     const prompt = ANALYSIS_SCHEMA_PROMPT.replace("{TITLE}", title);
+    const url = `${GEMINI_API_BASE}/${MODEL}:generateContent`;
 
-    const response = await fetch(ANTHROPIC_API_BASE, {
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": getApiKey(),
-        "anthropic-version": "2023-06-01",
+        "x-goog-api-key": getApiKey(),
       },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 512,
-        messages: [{ role: "user", content: prompt }],
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          maxOutputTokens: 512,
+        },
       }),
     });
 
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
       const message =
-        body.error?.message || `Anthropic API isteği başarısız (${response.status})`;
+        body.error?.message || `Gemini API isteği başarısız (${response.status})`;
       console.error(
         `[Title Analysis] HTTP ${response.status} - "${title.slice(0, 40)}..." - ${message}`
       );
@@ -109,10 +108,10 @@ async function analyzeTitle(title) {
     }
 
     const data = await response.json();
-    const textBlock = (data.content || []).find((block) => block.type === "text");
-    if (!textBlock) return null;
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return null;
 
-    const parsed = extractJson(textBlock.text);
+    const parsed = extractJson(text);
     return normalizeAnalysis(parsed);
   } catch (err) {
     console.error("[Title Analysis Error]", title, "-", err.message);
@@ -120,11 +119,6 @@ async function analyzeTitle(title) {
   }
 }
 
-/**
- * Birden fazla başlığı, küçük gruplar halinde paralel analiz eder.
- * @param {string[]} titles
- * @returns {Promise<(object|null)[]>} - titles ile aynı sırada, her biri analiz veya null
- */
 async function analyzeTitles(titles) {
   const results = [];
 
@@ -133,8 +127,3 @@ async function analyzeTitles(titles) {
     const batchResults = await Promise.all(batch.map((title) => analyzeTitle(title)));
     results.push(...batchResults);
   }
-
-  return results;
-}
-
-module.exports = { analyzeTitle, analyzeTitles };

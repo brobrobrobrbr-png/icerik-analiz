@@ -29,5 +29,5 @@ app.listen(PORT, () => {
   console.log(`İçerik Analiz sunucusu http://localhost:${PORT} adresinde çalışıyor`);
   console.log(`Mock veri modu: ${process.env.USE_MOCK_DATA !== "false" ? "AÇIK" : "KAPALI"}`);
   console.log(`YouTube API: ${process.env.YOUTUBE_API_KEY ? "yapılandırıldı" : "anahtar yok (demo modu önerilir)"}`);
-  console.log(`Anthropic API: ${process.env.ANTHROPIC_API_KEY ? "yapılandırıldı (AI Başlık Analizi aktif)" : "anahtar yok (AI Başlık Analizi pasif)"}`);
+  console.log(`Gemini API: ${process.env.GEMINI_API_KEY ? "yapılandırıldı (AI Başlık Analizi aktif)" : "anahtar yok (AI Başlık Analizi pasif)"}`);
 });
